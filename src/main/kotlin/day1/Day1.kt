@@ -23,14 +23,7 @@ class Day1 : ProblemRunner {
 
         firstList.sort()
         secondList.sort()
-
-        val distanceList = mutableListOf<Int>()
-        firstList.forEachIndexed { index, num ->
-            val secondNum = secondList[index]
-            println("$num - $secondNum = ${num - secondNum}")
-            distanceList.add(abs(num - secondNum))
-        }
-        val sum = distanceList.sum()
+        val sum = firstList.zip(secondList).sumOf { (a, b) -> abs(a - b) }
         return "sum = $sum"
     }
 

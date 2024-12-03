@@ -6,7 +6,7 @@ import kotlin.math.abs
 
 class Day2 : ProblemRunner {
     override val filePath: String
-        get() = "src/main/kotlin/day2/test_input.txt"
+        get() = "src/main/kotlin/day2/input.txt"
 
     override fun answerPartOne(input: File): String {
         var answerCount = 0
@@ -36,33 +36,54 @@ class Day2 : ProblemRunner {
 
     override fun answerPartTwo(input: File): String {
         var answerCount = 0
+        var dampened = 0
         input.forEachLine { line ->
             val report = line.split(' ')
                 .map { num ->
                     num.toInt()
                 }
 
-            var lastDiff = 0
-            var canIgnore = true
-            var isReportSafe = true
-            println(report.toString())
-            for (i in 0..<report.size-1) {
-                println("lastDiff = $lastDiff")
-                val absDiff = abs(report[i+1] - report[i])
-                val diff = report[i+1] - report[i]
-                val isSeqContinued = (lastDiff == 0) || (lastDiff > 0 && diff > 0) || (lastDiff < 0 && diff < 0)
-                val isSafeStep = absDiff in 1..3 && isSeqContinued
-                if (canIgnore && !isSafeStep) {
-                    canIgnore = false
-                } else if (!canIgnore && !isSafeStep) {
-                    isReportSafe = false
-                } else {
-                    lastDiff = diff
+            if (isGradual(report) && isSequential(report)) {
+                answerCount++
+            } else {
+                for (i in report.indices) {
+                    val sliced = report.toMutableList()
+                    val removed = sliced.removeAt(i)
+                    if (isGradual(sliced) && isSequential(sliced)) {
+                        dampened++
+                        break
+                    }
                 }
             }
-            if (isReportSafe) { answerCount++ }
         }
-        return "$answerCount safe with tolerance"
+        return "$answerCount safe with $dampened dampened"
+    }
+
+    private fun isGradual(levels: List<Int>): Boolean {
+        for (i in 1..levels.lastIndex) {
+            val diff = abs(levels[i] - levels[i-1])
+            if (diff !in 1..3) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun isSequential(levels: List<Int>): Boolean {
+        var didIncrease = false
+        var didDecrease = false
+        for (i in 1..levels.lastIndex) {
+            if (levels[i] > levels[i-1]) {
+                didIncrease = true
+            }
+            if (levels[i] < levels[i-1]) {
+                didDecrease = true
+            }
+            if (didDecrease && didIncrease) {
+                return false
+            }
+        }
+        return didIncrease || didDecrease
     }
 }
 
